@@ -1,0 +1,128 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+
+public class BrickBreakerGame extends JFrame {
+    private Paddle paddle;
+    private Ball ball;
+
+    public BrickBreakerGame() {
+        setTitle("Brick Breaker");
+        setSize(400, 600);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null); // Center the window
+        setResizable(false);
+
+        paddle = new Paddle();
+        ball = new Ball();
+
+        add(paddle);
+        add(ball);
+
+        addKeyListener(paddle);
+
+        setFocusable(true);
+        setVisible(true);
+
+        // Game loop
+        while (true) {
+            paddle.move();
+            ball.move();
+            handleCollision();
+            // Update game state
+            repaint();
+            try {
+                Thread.sleep(10); // Add a slight delay for smooth animation
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void handleCollision() {
+        // Check for collision with paddle
+        if (ball.getBounds().intersects(paddle.getBounds())) {
+            ball.reverseYDirection();
+        }
+
+        // Add logic for collision with walls and bricks if present
+    }
+
+    public static void main(String[] args) {
+        new BrickBreakerGame();
+    }
+
+    // Paddle class
+    private class Paddle extends JPanel implements KeyListener {
+        private int x = 175; // Initial x-coordinate
+        private int xSpeed = 0;
+
+        public Paddle() {
+            setFocusable(true);
+            addKeyListener(this);
+        }
+
+        public void move() {
+            x += xSpeed;
+            // Ensure the paddle stays within the window boundaries
+            if (x < 0) {
+                x = 0;
+            } else if (x > getWidth() - 50) {
+                x = getWidth() - 50;
+            }
+        }
+
+        public Rectangle getBounds() {
+            return new Rectangle(x, getHeight() - 20, 50, 10);
+        }
+
+        public void keyPressed(KeyEvent e) {
+            if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+                xSpeed = -3;
+            } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+                xSpeed = 3;
+            }
+        }
+
+        public void keyReleased(KeyEvent e) {
+            if (e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_RIGHT) {
+                xSpeed = 0;
+            }
+        }
+
+        public void keyTyped(KeyEvent e) {
+            // Handle key typing
+        }
+    }
+
+    // Ball class
+    private class Ball extends JPanel {
+        private int x = 200; // Initial x-coordinate
+        private int y = 300; // Initial y-coordinate
+        private int xSpeed = 2;
+        private int ySpeed = -2;
+
+        public void move() {
+            x += xSpeed;
+            y += ySpeed;
+
+            // Ensure the ball stays within the window boundaries
+            if (x < 0 || x > getWidth() - 20) {
+                xSpeed = -xSpeed; // Reverse the x-direction
+            }
+
+            if (y < 0 || y > getHeight() - 20) {
+                ySpeed = -ySpeed; // Reverse the y-direction
+            }
+        }
+
+        public Rectangle getBounds() {
+            return new Rectangle(x, y, 20, 20);
+        }
+
+        public void reverseYDirection() {
+            ySpeed = -ySpeed;
+        }
+    }
+}
